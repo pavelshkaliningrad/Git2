@@ -3,6 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,24 +15,27 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        try {
-            Util.getStatement().execute("CREATE TABLE Users (id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT , name  CHAR(50), lastName CHAR(50), age TINYINT)");
+        Connection conn = Util.getConnection();
+        try (conn) {
+            conn.createStatement().execute("CREATE TABLE Users (id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT , name  CHAR(50), lastName CHAR(50), age TINYINT)");
         } catch (SQLException e) {
             System.out.println("Ошибка при создании таблицы");
         }
     }
 
     public void dropUsersTable() {
-        try {
-            Util.getStatement().execute("DROP TABLE Users");
+        Connection conn = Util.getConnection();
+        try (conn) {
+            conn.createStatement().execute("DROP TABLE Users");
         } catch (SQLException e) {
             System.out.println("Ошибка при удалении таблицы");
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        try {
-            Util.getStatement().execute(String.format("INSERT INTO Users (name,lastName,age) VALUES (\"%s\",\"%s\",%d);",name,lastName,age));
+        Connection conn = Util.getConnection();
+        try (conn)  {
+            conn.createStatement().execute(String.format("INSERT INTO Users (name,lastName,age) VALUES (\"%s\",\"%s\",%d);",name,lastName,age));
         }
         catch (SQLException e) {
             System.out.println("Ошибка при создании нового пользователя");
@@ -39,8 +43,9 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        try {
-            Util.getStatement().execute(String.format("DELETE FROM Users WHERE id=%d",id));
+        Connection conn = Util.getConnection();
+        try (conn) {
+            conn.createStatement().execute(String.format("DELETE FROM Users WHERE id=%d",id));
         }
         catch (SQLException e) {
             System.out.println("Ошибка при удалении пользователя");
@@ -48,14 +53,15 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public List<User> getAllUsers() {
+        Connection conn = Util.getConnection();
         ResultSet resultSet ;
         List<User> userList = new ArrayList<>();
         Long id;
         String name;
         String lastname;
         Byte age;
-        try {
-            resultSet = Util.getStatement().executeQuery("SELECT * FROM database1.users");
+        try (conn) {
+            resultSet = conn.createStatement().executeQuery("SELECT * FROM database1.users");
             while (!resultSet.isLast()) {
                 resultSet.next();
                 id = resultSet.getLong("id");
@@ -73,8 +79,9 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        try {
-            Util.getStatement().execute(String.format("TRUNCATE TABLE database1.users"));
+        Connection conn = Util.getConnection();
+        try (conn) {
+            conn.createStatement().execute(String.format("TRUNCATE TABLE database1.users"));
         }
         catch (SQLException e) {
             System.out.println("Ошибка при очистки таблицы пользователей");
